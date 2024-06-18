@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {Calendar, momentLocalizer, Views} from 'react-big-calendar'
 import moment from 'moment'
 import 'moment/locale/ru'
@@ -9,6 +9,7 @@ import {ButtonSlider, Arrows, Loader} from '../../ui-kit'
 import {getSchedule} from '../../api'
 import {useSelector} from 'react-redux'
 import {RootState} from '../../storage/store'
+import { generateDoctorScheduleForMonth } from './calculateSchedule'
 
 // Локализация для 'react-big-calendar' с использованием 'moment'
 moment.locale('ru')
@@ -102,12 +103,16 @@ const useStyles = createUseStyles({
       width: 'fit-content',
       padding: [10, 24],
       borderRadius: 10,
+      '& .rbc-event-content:nth-child(even)': {
+        marginTop: -25,
+      }  
     },
     '& .rbc-row-segment': {
-      marginTop: 10,
+      marginTop: -13,
       borderRadius: 10,
       padding: 0,
       backgroundColor: 'transparent',
+      marginBottom: 20,
     },
     '& .rbc-toolbar': {
       display: 'none',
@@ -123,11 +128,14 @@ const MyCalendar = () => {
   const [view, setView] = useState(Views.MONTH)
   const [currentDate, setCurrentDate] = useState(moment().toDate())
   const [isLoading, setLoading] = useState(true)
-  const [events, setEvents] = useState<Events>()
+  const [events, setEvents] = useState<Events>([])
   const account = useSelector((state: RootState) => state.account)
+  const connectionIssued = useRef(true)
 
   useEffect(() => {
+    console.log('render')
     if (account.id && account.token) {
+      setLoading(true)
       const year = currentDate.getFullYear()
       const month = String(currentDate.getMonth() + 1).padStart(2, '0')
 
@@ -144,26 +152,31 @@ const MyCalendar = () => {
               }
             })
           }) as unknown as Events
-          setEvents(newEvents)
-
-          // const events = [
-          //   {
-          //     title: '13:00 - 18:00',
-          //     start: new Date(2024, 5, 3, 13, 0, 0),
-          //     end: new Date(2024, 5, 3, 18, 0, 0),
-          //   },
-          //   // Добавьте остальные события аналогичным образомx
-          // ]
-          // eslint-disable-next-line no-console
-          console.log(res)
-          return
+          if (newEvents) {
+            setEvents(newEvents)
+            connectionIssued.current = false
+          }
+        })
+        .catch(() => {
+          const year = currentDate.getFullYear()
+          const month = currentDate.getMonth()
+          setEvents(generateDoctorScheduleForMonth(+year, +month) as unknown as Events)
+          connectionIssued.current = true
         })
         .finally(() => {
+          console.log('KEKEKEKEKEKKE', events?.length)
+          if (events?.length === 0 || connectionIssued.current) {
+            connectionIssued.current = true
+            const year = currentDate.getFullYear()
+            const month = currentDate.getMonth()
+            setEvents(generateDoctorScheduleForMonth(+year, +month) as unknown as Events)
+            console.log(events)
+          }
           setLoading(false)
         })
     }
     setLoading(false)
-  }, [account.id, account.token])
+  }, [account.id, account.token, currentDate])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleViewChange = (newView: any) => {
@@ -177,6 +190,7 @@ const MyCalendar = () => {
     } else {
       newDate = moment(currentDate).add(1, 'months').toDate()
     }
+    setEvents([])
     setCurrentDate(newDate)
   }
 

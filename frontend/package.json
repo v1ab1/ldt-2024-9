@@ -9,7 +9,7 @@
     "check:typescript": "tsc -noEmit",
     "build": "webpack",
     "start": "react-scripts start",
-    "rc:build": "react-scripts build"
+    "rc:build": "react-scripts build --force"
   },
   "browserslist": {
     "production": [

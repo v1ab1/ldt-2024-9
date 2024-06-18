@@ -128,7 +128,7 @@ export const getWorkloadByDoctor = async (
   doctor_id: number,
   token: string
 ): Promise<GetWorkloadByDoctor> => {
-  const response = await api.get<GetWorkloadByDoctor>('api/v1/reports' + workload_type + '/' + doctor_id, {
+  const response = await api.get<GetWorkloadByDoctor>('api/v1/reports/' + workload_type + '/' + doctor_id, {
     headers: {Authorization: `Bearer ${token}`},
   })
 
