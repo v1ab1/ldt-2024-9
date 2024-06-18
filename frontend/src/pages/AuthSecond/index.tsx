@@ -19,36 +19,32 @@ export const AuthSecond: React.FC<AuthSecondProps> = () => {
   const [password, setPassword] = useState('')
   const dispatch = useDispatch<AppDispatch>()
 
-  const auth = () => {
+  const auth = async () => {
     if (!email || !password) {
       return
     }
-    loginForAccessToken(email, password).then((res) => {
-      dispatch(
+
+    try {
+      const res = await loginForAccessToken(email, password)
+      const expiryDate = new Date()
+      expiryDate.setDate(expiryDate.getDate() + 7)
+      document.cookie = `jwtToken=${JSON.stringify({ token: res.access_token, expiry: expiryDate.getTime() })}; expires=${expiryDate.toUTCString()}; path=/`
+
+      const userRes = await getMyself(res.access_token)
+      await dispatch(
         setAccountData({
+          id: userRes.id,
+          fullName: userRes.full_name,
+          dateOfBirth: userRes.date_of_birth,
+          position: userRes.position,
+          specialization: userRes.specialization,
           token: res.access_token,
         })
       )
-
-      const expiryDate = new Date()
-      expiryDate.setDate(expiryDate.getDate() + 7)
-      document.cookie = `jwtToken=${JSON.stringify({token: res.access_token, expiry: expiryDate.getTime()})}; expires=${expiryDate.toUTCString()}; path=/`
-
-      // by_sheer_willpower"
-
-      getMyself(res.access_token).then((res) => {
-        dispatch(
-          setAccountData({
-            id: res.id,
-            fullName: res.full_name,
-            dateOfBirth: res.date_of_birth,
-            position: res.position,
-            specialization: res.specialization,
-          })
-        )
-        navigate('/profile')
-      })
-    })
+      navigate('/profile')
+    } catch (error) {
+      console.error('Ошибка при авторизации:', error)
+    }
   }
 
   return (

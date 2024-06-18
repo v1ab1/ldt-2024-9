@@ -15,8 +15,9 @@ export const Job = () => {
   const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
-    if ((account.id || account.id === 0) && account.token) {
-      getDoctor(account.id, account.token)
+    const id: number = account.id ? account.id : 1
+    if (account.token) {
+      getDoctor(id, account.token)
         .then((res) => {
           if (res.skills.primary_skill) {
             skills.current.push(res.skills.primary_skill)
@@ -31,9 +32,9 @@ export const Job = () => {
           return
         })
         .then(() => {
-          if (account.id && account.token) {
+          if (id && account.token) {
             const workloadPromises = skills.current.map((el) => {
-              return getWorkloadByDoctor(el, account.id ?? 0, account.token ?? '')
+              return getWorkloadByDoctor(el, id ?? 0, account.token ?? '')
             })
 
             Promise.all(workloadPromises)
@@ -44,22 +45,35 @@ export const Job = () => {
                 }))
                 setWorkloadInfo(newWorkloadInfo)
               })
-              .catch((error) => {
-                // eslint-disable-next-line no-console
-                console.error(error)
-              })
               .then(() => {
                 setLoading(false)
               })
           }
+        }).catch(() => {
+          const workloadInfo = [
+          {workload_type : 'densitometer', amount: 0},
+          {workload_type : 'ct', amount: 0},
+          {workload_type : 'ct_contrast', amount: 0},
+          {workload_type : 'ct_contrast_multi', amount: 0},
+          {workload_type : 'mmg', amount: 0},
+          {workload_type : 'mri', amount: 0},
+          {workload_type : 'mri_contrast', amount: 0},
+          {workload_type : 'mri_contrast_multi', amount: 0},
+          {workload_type : 'rg', amount: 0},
+          {workload_type : 'fluorography', amount: 0}]
+          setWorkloadInfo(workloadInfo)
+        }).finally(() => {
+          setLoading(false)
         })
     }
   }, [account.id, account.token])
 
   const postInfo = () => {
+    const id: number = account.id ? account.id : 1
+
     const workloadPromises = workloadInfo.map((el) => {
-      if (account.id && account.token) {
-        return postWorkloadByDoctor(el.workload_type, account.id, el.amount, account.token)
+      if (account.token) {
+        return postWorkloadByDoctor(el.workload_type, id, el.amount, account.token)
       }
     })
 

@@ -1,1 +1,2 @@
-export const API_URL = 'http://51.250.15.135:8000'
+export const API_URL = 'https://api.vlabl.ru/'
+// export const API_URL = 'http://62.84.113.159:8000/'

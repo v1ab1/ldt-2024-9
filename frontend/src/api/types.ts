@@ -122,3 +122,33 @@ export type GetWorkloadByDoctor = {
   workload_type: string
   amount: number
 }
+
+export type Schedule = {
+  schedule: {
+    intervals: {
+      start_time: string
+      end_time: string
+      is_break: boolean
+    }[]
+    date: string
+    total_break_time: string
+    total_working_time: string
+  }[]
+}
+
+// {
+//   "schedule": [
+//     {
+//       "intervals": [
+//         {
+//           "start_time": "20:14:17.280Z",
+//           "end_time": "20:14:17.280Z",
+//           "is_break": true
+//         }
+//       ],
+//       "date": "2024-06-17",
+//       "total_break_time": "20:14:17.280Z",
+//       "total_working_time": "20:14:17.280Z"
+//     }
+//   ]
+// }

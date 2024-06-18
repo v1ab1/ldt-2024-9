@@ -41,11 +41,65 @@ export const Detect = () => {
             <BlueButton
               isInverse
               text='Скачать отчет'
+              className={c.headerButtons}
               onClick={() => {
                 if (account.token) {
-                  getFile(account.token).then((res) => {
+                  getFile(account.token, 'table.xlsx').then(async (res) => {
                     // eslint-disable-next-line no-console
                     console.log(res)
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const url = window.URL.createObjectURL(new Blob([res]))
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'table.xlsx'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
+                  })
+                }
+              }}
+            />
+            <BlueButton
+              isInverse
+              text='Скачать предсказания в xlsx'
+              className={c.headerButtons}
+              onClick={() => {
+                if (account.token) {
+                  getFile(account.token, 'predictions.xlsx').then(async (res) => {
+                    // eslint-disable-next-line no-console
+                    console.log(res)
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const url = window.URL.createObjectURL(new Blob([res]))
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'predictions.xlsx'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
+                  })
+                }
+              }}
+            />
+            <BlueButton
+              isInverse
+              text='Скачать предсказания в csv'
+              className={c.headerButtons}
+              onClick={() => {
+                if (account.token) {
+                  getFile(account.token, 'predictions.csv').then(async (res) => {
+                    // eslint-disable-next-line no-console
+                    console.log(res)
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    const url = window.URL.createObjectURL(new Blob([res]))
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'predictions.csv'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
                   })
                 }
               }}
@@ -135,5 +189,9 @@ const useStyles = createUseStyles({
   },
   sickness: {
     backgroundColor: 'rgba(255, 226, 226, 1)',
+  },
+  headerButtons: {
+    width: '250px !important',
+    height: 60,
   },
 })
